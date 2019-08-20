@@ -1,6 +1,4 @@
 import numpy as np
-
-import yt
 import yt.units as u
 import yt.utilities.physical_constants as const
 from yt.fields.api import ValidateSpatial
@@ -68,25 +66,33 @@ def add_rad_sobolev_field(ds):
     #########################
     
     ## double check if simulation is using sobolev
-    if ( ds.derived_field_list == ('gamer', 'Opacity_X1') ):
+    if 1:
         ds.add_field(('gas', 'optical_depth_x'), \
-                      function=get_op_depth_x, units="")
+                      function=get_op_depth_x, units="", \
+                      sampling_type='cell')
         ds.add_field(('gas', 'optical_depth_y'), \
-                      function=get_op_depth_y, units="")
+                      function=get_op_depth_y, units="", \
+                      sampling_type='cell')
         ds.add_field(('gas', 'optical_depth_z'), \
-                     function=get_op_depth_z, units="")
+                     function=get_op_depth_z, units="", \
+                     sampling_type='cell')
                  
         ds.add_field(('gas', 'sobolev_length_x'), \
-                     function=get_sobolev_length_x, units="au")
+                     function=get_sobolev_length_x, units="au", \
+                     sampling_type='cell')
         ds.add_field(('gas', 'sobolev_length_y'), \
-                     function=get_sobolev_length_y, units="au")
+                     function=get_sobolev_length_y, units="au", \
+                     sampling_type='cell')
         ds.add_field(('gas', 'sobolev_length_z'), \
-                     function=get_sobolev_length_z, units="au")
+                     function=get_sobolev_length_z, units="au", \
+                     sampling_type='cell')
         ds.add_field(('gas', 'sobolev_length'), \
-                     function=get_sobolev_length, units="au")
+                     function=get_sobolev_length, units="au", \
+                     sampling_type='cell')
     
         ds.add_field(('gas', 'H2_escape_frac_sobolev'), \
-                     function=get_H2_sobolev_escape_frac, units="")
+                     function=get_H2_sobolev_escape_frac, units="", \
+                     sampling_type='cell')
     
     
 

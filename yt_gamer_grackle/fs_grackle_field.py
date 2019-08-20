@@ -1,5 +1,9 @@
+import numpy as np
+import yt.units as u
+import yt.utilities.physical_constants as const
+from yt.fields.api import ValidateSpatial
 
-def get_grackle_field(ds):
+def add_grackle_field(ds):
     
     mass_unit   = ds.mass_unit.in_cgs()
     length_unit = ds.length_unit.in_cgs()
@@ -103,13 +107,16 @@ def get_grackle_field(ds):
     
     # 2.0 rate
     ds.add_field(('gas', 'H2_formation_rate'), \
-                 function=get_H2_rate_f, units="cm**6/s")
+                 function=get_H2_rate_f, units="cm**6/s", \
+                 sampling_type='cell')
     ds.add_field(('gas', 'H2_destruction_rate'), \
-                 function=get_H2_rate_d, units="cm**3/s")
+                 function=get_H2_rate_d, units="cm**3/s", \
+                 sampling_type='cell')
                  
     # 3.0 derived chemistry field
     ds.add_field(('gas', 'H2_mass_fraction'), \
-                 function=get_H2_mass_fraction, units="", take_log=False)
+                 function=get_H2_mass_fraction, units="", take_log=False, \
+                 sampling_type='cell')
     
     
     

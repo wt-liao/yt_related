@@ -1,3 +1,7 @@
+import numpy as np
+import yt.units as u
+import yt.utilities.physical_constants as const
+from yt.fields.api import ValidateSpatial
 
 def add_rad_disk_field(ds):
     mass_unit   = ds.mass_unit.in_cgs()
@@ -29,12 +33,14 @@ def add_rad_disk_field(ds):
     #### II. add fields #####
     #########################
     ## double check if simulation is using disk opacity
-    if ( ds.derived_field_list == ('gamer', 'DiskOpacity') ):
-        
+    #if ( ds.derived_field_list == ('gamer', 'DiskOpacity') ):
+    if 1:    
         ds.add_field(('gas', 'optical_depth_disk'), \
-                      function=get_disk_op_depth, units="")
+                     function=get_disk_op_depth, units="", \
+                     sampling_type='cell')
         ds.add_field(('gas', 'H2_escape_frac_disk'), \
-                     function=get_H2_disk_escape_frac, units="")
+                     function=get_H2_disk_escape_frac, units="", \
+                     sampling_type='cell')
         
         
         

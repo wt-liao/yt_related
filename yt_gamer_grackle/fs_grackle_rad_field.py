@@ -1,3 +1,8 @@
+import numpy as np
+import yt.units as u
+import yt.utilities.physical_constants as const
+from yt.fields.api import ValidateSpatial
+
 from fs_grackle_rad_sobolev_field import *
 from fs_grackle_rad_disk_field import *
 
@@ -66,13 +71,13 @@ def add_grackle_rad_field(ds, optical_depth=1):
     def get_cooling_rate(field, data):
         cooling_CIE = data['gas', 'CIE_cooling_rate']
         cooling_H2  = data['gas', 'H2_optical_thin_cooling_rate']
-        if opticaldepth == 2:
+        if optical_depth == 2:
             f_esc = data['gas', 'H2_escape_frac_sobolev']
-        elif opticaldepth == 3:
+        elif optical_depth == 3:
             f_esc = data['gas', 'H2_escape_frac_disk']
 
         cooling_tot = f_esc*cooling_H2 + cooling_CIE
-        return cooling_rate
+        return cooling_tot
     
        
     def get_cooling_time(field, data):
@@ -86,13 +91,13 @@ def add_grackle_rad_field(ds, optical_depth=1):
     #### II. add fields #####
     #########################
     
-    ds.add_field(('gas', 'H2_optical_thin_cooling_rate'), \
+    ds.add_field(('gas', 'H2_optical_thin_cooling_rate'), sampling_type='cell', \
                  function=get_H2_cooling, units="erg/s/cm**3", take_log=True)
-    ds.add_field(('gas', 'CIE_cooling_rate'), \
+    ds.add_field(('gas', 'CIE_cooling_rate'), sampling_type='cell', \
                  function=get_CIE_cooling, units="erg/s/cm**3", take_log=True)
-    ds.add_field(('gas', 'popIII_cooling_rate'), \
+    ds.add_field(('gas', 'popIII_cooling_rate'), sampling_type='cell', \
                  function=get_cooling_rate, units="erg/s/cm**3", take_log=True)
-    ds.add_field(('gas', 'popIII_cooling_time'), \
+    ds.add_field(('gas', 'popIII_cooling_time'), sampling_type='cell', \
                  function=get_cooling_time, units="s", take_log=True)
     
     

@@ -11,10 +11,10 @@ from fs_grackle_rad_field import *
 
 
 def add_popIII_field(ds, **kwargs):
-    optical_depth = kwargs["optical_dpeth"]
+    optical_depth = kwargs["optical_depth"]
     
     add_grackle_field(ds)
-    add_grackle_rad_fields(ds, optical_depth = optical_depth)
+    add_grackle_rad_field(ds, optical_depth = optical_depth)
 
 
 if __name__ == "__main__":
