@@ -8,6 +8,7 @@ works under: gamer cyl coord; 9-species grackle field
 
 from fs_grackle_field import *
 from fs_grackle_rad_field import *
+from gamer_cyl_field import *
 
 
 def add_popIII_field(ds, **kwargs):
@@ -15,6 +16,11 @@ def add_popIII_field(ds, **kwargs):
     
     add_grackle_field(ds)
     add_grackle_rad_field(ds, optical_depth = optical_depth)
+
+
+def add_cyl_field(ds, **kwargs):
+    add_gamer_cyl_field(ds)
+
 
 
 if __name__ == "__main__":
@@ -32,4 +38,6 @@ if __name__ == "__main__":
     optical_depth = args.optical_depth
     
     ds = yt.load(filepath)
+    
     add_popIII_field(ds, optical_depth = optical_depth)
+    add_cyl_field(ds)

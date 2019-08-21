@@ -81,7 +81,7 @@ def add_grackle_rad_field(ds, optical_depth=1):
     
        
     def get_cooling_time(field, data):
-        E_int        = data['gas', 'thermal_energy']
+        E_int        = data['gas', 'thermal_energy'] * data['gamer', 'Dens'] # thermal engy per vol
         cooling_rate = data['gas', 'popIII_cooling_rate']
         
         return E_int / cooling_rate
