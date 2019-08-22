@@ -20,7 +20,8 @@ def add_grackle_field(ds):
     #######################
     # 1.0 fix grackle field
     def get_electron(field, data):
-        return data['gamer', 'Electron'] * rho_unit
+        mass_ratio = const.mass_electron_cgs/const.mass_hydrogen_cgs
+        return data['gamer', 'Electron'] * rho_unit * mass_ratio
         
     def get_HI(field, data):
         return data['gamer', 'HI'] * rho_unit
@@ -60,8 +61,40 @@ def add_grackle_field(ds):
         return 5.24e-7*T**(-0.485)*np.exp(-52000/T) * (u.cm**3/u.s)
     
     # 3.0 derived chemistry field
+    def get_mean_molecular_weight(field, data):
+        m_e,  m_H  = const.mass_electron_cgs, const.mass_hydrogen_cgs
+        m_H2, m_He = 2.0*m_H, 4.0*m_H
+        
+        n_e     = data['gas', 'Electron'] / m_e
+        n_HI    = data['gas', 'HI']    / m_H
+        n_HII   = data['gas', 'HII']   / m_H
+        n_HM    = data['gas', 'HM']    / m_H
+        n_HeI   = data['gas', 'HeI']   / m_He
+        n_HeII  = data['gas', 'HeII']  / m_He
+        n_HeIII = data['gas', 'HeIII'] / m_He
+        n_H2I   = data['gas', 'H2I']   / m_H2
+        n_H2II  = data['gas', 'H2II']  / m_H2
+        
+        n_tot = n_e + n_HI + n_HII + n_HM + n_HeI + n_HeII + n_HeIII +\
+                n_H2I + n_H2II
+        
+        return data['gas', 'density']/ (m_H*n_tot)
+        
+    
     def get_H2_mass_fraction(field, data):
         return data['gas', 'H2I'] / (0.76*data['gas', 'density'])
+        
+    # 4.0 temperature based on mean molecular weight
+    def get_temperature_grackle(field, data):
+        pressure = data['gas', 'pressure']
+        density  = data['gas', 'density']
+        mu       = data['gas', 'mean_molecular_weight']
+        kb       = const.boltzmann_constant_cgs
+        m_H      = const.mass_hydrogen_cgs
+        R        = kb/(mu*m_H)
+        T        = pressure/(density*R)
+        
+        return T
     
     
     #########################
@@ -114,10 +147,16 @@ def add_grackle_field(ds):
                  sampling_type='cell')
                  
     # 3.0 derived chemistry field
+    ds.add_field(('gas', 'mean_molecular_weight'), \
+                 function=get_mean_molecular_weight, units="", take_log=False, \
+                 sampling_type='cell')
     ds.add_field(('gas', 'H2_mass_fraction'), \
                  function=get_H2_mass_fraction, units="", take_log=False, \
                  sampling_type='cell')
     
-    
+    # 4.0 temperature based on mean molecular weight
+    ds.add_field(('gas', 'temperature'), \
+                 function=get_temperature_grackle, units='K', \
+                 force_override=True, take_log=True, sampling_type='cell')
     
     

@@ -41,7 +41,7 @@ def add_grackle_rad_field(ds, optical_depth=1):
     
     def get_H2_cooling(field, data):
         rho  = data['gas', 'density'] / (u.g/u.cm**3)
-        T    = data['temperature'] / u.K
+        T    = data['gas', 'temperature'] / u.K
         f_H2 = data['gas', 'H2_mass_fraction']
         T3   = T*1.0e-3
         
@@ -60,7 +60,7 @@ def add_grackle_rad_field(ds, optical_depth=1):
         
     def get_CIE_cooling(field, data):
         rho  = data['gas', 'density'] / (u.g/u.cm**3)
-        T    = data['temperature'] / u.K
+        T    = data['gas' ,'temperature'] / u.K
         f_H2 = data['gas', 'H2_mass_fraction'] 
         
         ## return cooling rate per vol
