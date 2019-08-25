@@ -27,6 +27,16 @@ def get_dvr_dr(field, data):
     
     return new_field 
 
+def get_drvr_dr(field, data):
+    fieldData = data['velocity_r']*data['gamer', 'r']
+    new_field = data.ds.arr(np.zeros(fieldData.shape, dtype=fieldData.dtype),
+                            fieldData.units/data["index", "dr"].units)
+    new_field[1:-1,1:-1,1:-1] = (
+        (fieldData[2:,1:-1,1:-1] - fieldData[:-2,1:-1,1:-1]) /
+        (2. * data["index", "dr"][1:-1,1:-1,1:-1]))
+    
+    return new_field 
+
 def get_dvtheta_dr(field, data):
     fieldData = data['velocity_theta']
     new_field = data.ds.arr(np.zeros(fieldData.shape, dtype=fieldData.dtype),
@@ -122,7 +132,7 @@ def get_dvz_dz(field, data):
     return new_field 
 
 
-### 3.0 vorticity field
+### 3.0 fields from velocity gradient
 def get_vorticity_r(field, data):
     # vorticity_r     = dvz_dtheta/radius - dvtheta_dz
     return (data['gas','velocity_z_gradient_theta']/data["index", "r"]) - data['gas','velocity_theta_gradient_z']
@@ -140,6 +150,14 @@ def get_vorticity(field, data):
     vorticity_theta = data['gas', 'vorticity_theta']
     vorticity_z     = data['gas', 'vorticity_z']
     return np.sqrt(vorticity_r**2.0 + vorticity_theta**2.0 + vorticity_z**2.0)
+    
+def get_velocity_divergence(field, data):
+    grad_r_component     = data['gas', 'r_velocity_r_gradient_r'] / data['gamer', 'r']
+    grad_theta_component = data['gas', 'velocity_theta_gradient_theta'] / data['gamer', 'r']
+    grad_z_component     = data['gas', 'velocity_z_gradient_z']
+    
+    return grad_r_component + grad_theta_component + grad_z_component
+    
 
 def get_helicity(feild, data):
     #vorticity_r*vr + vorticity_theta*vtheta + vorticity_z*vz
@@ -166,3 +184,46 @@ def get_kappa(field, data):
     outData[fieldData < 0] = 0.0/u.s
     
     return outData
+    
+### 5.0 keplerian velocity 
+def get_keplerian_velocity(field, data):
+    ## 1. gravitational aceleration due to self-g
+    fieldData = data['gamer', 'Pote']
+    new_field = data.ds.arr(np.zeros(fieldData.shape, dtype=fieldData.dtype),
+                            fieldData.units/data["index", "dr"].units)
+    new_field[1:-1,1:-1,1:-1] = (
+        (fieldData[2:,1:-1,1:-1] - fieldData[:-2,1:-1,1:-1]) /
+        (2. * data["index", "dr"][1:-1,1:-1,1:-1]))
+    
+    ## 2. gravitational acceleration due to central star
+    ## TO DO: m_star   = data.get_field_parameter("m_star")
+    ##        star_pos = data.get_field_parameter("star_pos")
+    m_star = 0.2*u.msun 
+    new_field += const.G*m_star / data['gamer', 'r']**2
+    
+    ## 3. v^2 / r = a 
+    kep_vel_square = new_field * data['gamer', 'r']
+    
+    kep_vel = np.sqrt(kep_vel_square)
+    kep_vel[kep_vel_square < 0] = 0.0 * (u.cm/u.s)
+    
+    return kep_vel
+    
+### 6.0 energy related field
+def get_PdV_cooling(field, data):
+    # positive: cooling; negative: heating
+    pressure = data['gas', 'pressure']
+    grad_v   = data['gas', 'velocity_divergence']
+    
+    # in unit of: rate per vol
+    return pressure*grad_v 
+
+def get_PdV_cooling_time(field, data):
+    # positive: cooling; negative: heating
+    cooling = data['gas', 'PdV_cooling']
+    E_int   = data['gas', 'thermal_energy'] * data['gamer', 'Dens'] # thermal engy per vol
+    
+    return E_int / cooling
+
+
+
